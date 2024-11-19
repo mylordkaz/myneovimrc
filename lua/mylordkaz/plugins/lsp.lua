@@ -6,7 +6,7 @@ local null_ls = require('null-ls')
 lsp_zero.extend_lspconfig({
 	capabilities = require('cmp_nvim_lsp').default_capabilities(),
 	lsp_attach = function(client, bufnr)
-		lsp_zero.default_keymaps({buffer = bufnr})
+		lsp_zero.default_keymaps({ buffer = bufnr })
 	end,
 	float_border = 'rounded',
 	sign_text = true,
@@ -16,122 +16,134 @@ lsp_zero.extend_lspconfig({
 require('mason').setup({})
 require('mason-lspconfig').setup({
 	ensure_installed = {
-		'ts_ls',     		-- JS/TS
+		'ts_ls',      -- JS/TS
 		'lua_ls',
-		'gopls',        -- Go
-		'svelte',       -- Svelte
+		'gopls',      -- Go
+		'svelte',     -- Svelte
 		'intelephense', -- PHP
-		'eslint',       -- Linting
-		'tailwindcss'		-- Tailwind
+		'eslint',     -- Linting
+		'tailwindcss' -- Tailwind
 	},
 	handlers = {
 		function(server_name)
 			require('lspconfig')[server_name].setup({})
 		end,
+		["lua_ls"] = function()
+			local lspconfig = require("lspconfig")
+			lspconfig.lua_ls.setup {
+				settings = {
+					Lua = {
+						diagnostics = {
+							globals = { "vim", "it", "describe", "before_each", "after_each" },
+						}
+					}
+				}
+			}
+		end,
 
 		-- TypeScript config
-    ts_ls = function()
-      require('lspconfig').ts_ls.setup({
-        settings = {
-          typescript = {
-            inlayHints = {
-              includeInlayParameterNameHints = 'all',
-              includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-              includeInlayFunctionParameterTypeHints = true,
-              includeInlayVariableTypeHints = true,
-              includeInlayPropertyDeclarationTypeHints = true,
-              includeInlayFunctionLikeReturnTypeHints = true,
-              includeInlayEnumMemberValueHints = true,
-            }
-          },
-          javascript = {
-            inlayHints = {
-              includeInlayParameterNameHints = 'all',
-              includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-              includeInlayFunctionParameterTypeHints = true,
-              includeInlayVariableTypeHints = true,
-              includeInlayPropertyDeclarationTypeHints = true,
-              includeInlayFunctionLikeReturnTypeHints = true,
-              includeInlayEnumMemberValueHints = true,
-            }
-          }
-        }
-      })
-    end,
+		ts_ls = function()
+			require('lspconfig').ts_ls.setup({
+				settings = {
+					typescript = {
+						inlayHints = {
+							includeInlayParameterNameHints = 'all',
+							includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+							includeInlayFunctionParameterTypeHints = true,
+							includeInlayVariableTypeHints = true,
+							includeInlayPropertyDeclarationTypeHints = true,
+							includeInlayFunctionLikeReturnTypeHints = true,
+							includeInlayEnumMemberValueHints = true,
+						}
+					},
+					javascript = {
+						inlayHints = {
+							includeInlayParameterNameHints = 'all',
+							includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+							includeInlayFunctionParameterTypeHints = true,
+							includeInlayVariableTypeHints = true,
+							includeInlayPropertyDeclarationTypeHints = true,
+							includeInlayFunctionLikeReturnTypeHints = true,
+							includeInlayEnumMemberValueHints = true,
+						}
+					}
+				}
+			})
+		end,
 
 		-- Tailwind config
-    tailwindcss = function()
-      require('lspconfig').tailwindcss.setup({
-        settings = {
-          tailwindCSS = {
-            experimental = {
-              classRegex = {
-                "tw`([^`]*)",       -- tw`...`
-                'tw="([^"]*)',      -- <div tw="..." />
-                'tw={"([^"}]*)',    -- <div tw={"..."} />
-                "tw\\.\\w+`([^`]*)", -- tw.xxx`...`
-                "tw\\(.*?\\)`([^`]*)", -- tw(..)`...`
-                "className=\"([^\"]*)", -- className="..."
-                "className={\"([^\"}]*)", -- className={"..."}
-                "class=\"([^\"]*)", -- class="..."
-                "class={\"([^\"}]*)", -- class={"..."}
-              },
-            },
-            validate = true,
-          },
-        },
-      })
-    end,
+		tailwindcss = function()
+			require('lspconfig').tailwindcss.setup({
+				settings = {
+					tailwindCSS = {
+						experimental = {
+							classRegex = {
+								"tw`([^`]*)",     -- tw`...`
+								'tw="([^"]*)',    -- <div tw="..." />
+								'tw={"([^"}]*)',  -- <div tw={"..."} />
+								"tw\\.\\w+`([^`]*)", -- tw.xxx`...`
+								"tw\\(.*?\\)`([^`]*)", -- tw(..)`...`
+								"className=\"([^\"]*)", -- className="..."
+								"className={\"([^\"}]*)", -- className={"..."}
+								"class=\"([^\"]*)", -- class="..."
+								"class={\"([^\"}]*)", -- class={"..."}
+							},
+						},
+						validate = true,
+					},
+				},
+			})
+		end,
 
 		-- Svelte config
-    svelte = function()
-      require('lspconfig').svelte.setup({
-        settings = {
-          svelte = {
-            plugin = {
-              typescript = {
-                enabled = true,
-              },
-            },
-          },
-        },
-      })
-    end,
+		svelte = function()
+			require('lspconfig').svelte.setup({
+				settings = {
+					svelte = {
+						plugin = {
+							typescript = {
+								enabled = true,
+							},
+						},
+					},
+				},
+			})
+		end,
 
 		-- Golang config
-    gopls = function()
-      require('lspconfig').gopls.setup({
-        settings = {
-          gopls = {
-            analyses = {
-              unusedparams = true,
-            },
-            staticcheck = true,
-            gofumpt = true,
-            usePlaceholders = true,
-            hints = {
-              assignVariableTypes = true,
-              compositeLiteralFields = true,
-              compositeLiteralTypes = true,
-              constantValues = true,
-              functionTypeParameters = true,
-              parameterNames = true,
-              rangeVariableTypes = true,
-            },
-          },
-        },
-      })
-    end,
+		gopls = function()
+			require('lspconfig').gopls.setup({
+				settings = {
+					gopls = {
+						analyses = {
+							unusedparams = true,
+						},
+						staticcheck = true,
+						gofumpt = true,
+						usePlaceholders = true,
+						hints = {
+							assignVariableTypes = true,
+							compositeLiteralFields = true,
+							compositeLiteralTypes = true,
+							constantValues = true,
+							functionTypeParameters = true,
+							parameterNames = true,
+							rangeVariableTypes = true,
+						},
+					},
+				},
+			})
+		end,
 	}
 })
 
 -- Completion Setup
 cmp.setup({
 	sources = {
-		{name = 'path'},
-		{name = 'nvim_lsp'},
-		{name = 'buffer', keyword_length = 3},
-		{name = 'luasnip', keyword_length = 2},
+		{ name = 'path' },
+		{ name = 'nvim_lsp' },
+		{ name = 'buffer',  keyword_length = 3 },
+		{ name = 'luasnip', keyword_length = 2 },
 	},
 	formatting = lsp_zero.cmp_format(),
 	mapping = cmp.mapping.preset.insert({
@@ -163,6 +175,7 @@ require('mason-null-ls').setup({
 null_ls.setup({
 	sources = {
 		null_ls.builtins.formatting.prettier,
+		null_ls.builtins.diagnostics.golangci_lint,
 		null_ls.builtins.formatting.gofmt,
 		null_ls.builtins.formatting.phpcsfixer,
 		null_ls.builtins.diagnostics.eslint_d,
