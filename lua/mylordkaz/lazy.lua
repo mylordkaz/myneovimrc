@@ -79,6 +79,14 @@ return require("lazy").setup({
 			'jayp0521/mason-null-ls.nvim',
 		}
 	},
+	
+	{
+		"windwp/nvim-autopairs",
+		config = function()
+			require("nvim-autopairs").setup({})
+		end,
+	},
+
 
 	-- color schemes
 	'sainnhe/sonokai',
