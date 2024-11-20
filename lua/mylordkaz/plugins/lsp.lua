@@ -169,6 +169,7 @@ require('mason-null-ls').setup({
 		'golangci-lint',
 		'eslint_d',
 		'php-cs-fixer',
+
 	}
 })
 
@@ -180,11 +181,17 @@ null_ls.setup({
 		null_ls.builtins.formatting.phpcsfixer,
 		null_ls.builtins.diagnostics.eslint_d,
 		null_ls.builtins.diagnostics.golangci_lint,
-	}
+		null_ls.builtins.diagnostics.markuplint,
+		null_ls.builtins.diagnostics.tidy,
+		null_ls.builtins.diagnostics.eslint.with({
+			filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "svelte", "html" }
+		}),
+	},
 })
 
 -- Format on save
 vim.api.nvim_create_autocmd("BufWritePre", {
+	pattern = { "*" },
 	callback = function()
 		vim.lsp.buf.format({ timeout_ms = 2000 })
 	end,

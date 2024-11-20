@@ -88,6 +88,12 @@ return require("lazy").setup({
 	},
 
 
+	{
+		'numToStr/Comment.nvim',
+		config = true,
+		lazy = false,
+	},
+
 	-- color schemes
 	'sainnhe/sonokai',
 	{ "catppuccin/nvim", name = "catppuccin" },
