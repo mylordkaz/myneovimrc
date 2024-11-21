@@ -169,31 +169,46 @@ require('mason-null-ls').setup({
 		'golangci-lint',
 		'eslint_d',
 		'php-cs-fixer',
+		'markuplint',
+		'tidy',
 
 	}
 })
 
 null_ls.setup({
 	sources = {
-		null_ls.builtins.formatting.prettier,
-		null_ls.builtins.diagnostics.golangci_lint,
+		-- Formatting
+		null_ls.builtins.formatting.prettier, -- Default settings
 		null_ls.builtins.formatting.gofmt,
 		null_ls.builtins.formatting.phpcsfixer,
+
+		-- Diagnostics
 		null_ls.builtins.diagnostics.eslint_d,
 		null_ls.builtins.diagnostics.golangci_lint,
-		null_ls.builtins.diagnostics.markuplint,
-		null_ls.builtins.diagnostics.tidy,
-		null_ls.builtins.diagnostics.eslint.with({
-			filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "svelte", "html" }
-		}),
+
 	},
+	debug = false,
 })
 
 -- Format on save
 vim.api.nvim_create_autocmd("BufWritePre", {
 	pattern = { "*" },
-	callback = function()
-		vim.lsp.buf.format({ timeout_ms = 2000 })
+	callback = function(args)
+		-- Only format if a formatter is available for the current filetype
+		local filetype = vim.bo[args.buf].filetype
+		local have_nls = #require("null-ls.sources").get_available(filetype, "NULL_LS_FORMATTING") > 0
+
+		vim.lsp.buf.format({
+			bufnr = args.buf,
+			timeout_ms = 3000,
+			filter = function(client)
+				-- Use null-ls when available, otherwise use the first available formatter
+				if have_nls then
+					return client.name == "null-ls"
+				end
+				return client.name ~= "null-ls"
+			end,
+		})
 	end,
 })
 
