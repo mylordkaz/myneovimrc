@@ -169,9 +169,6 @@ require('mason-null-ls').setup({
 		'golangci-lint',
 		'eslint_d',
 		'php-cs-fixer',
-		'markuplint',
-		'tidy',
-
 	}
 })
 
