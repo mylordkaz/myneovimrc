@@ -11,6 +11,14 @@ vim.opt.softtabstop = 2
 vim.opt.smartindent = true
 
 
+vim.api.nvim_create_autocmd("BufEnter", {
+	pattern = "*",
+	callback = function()
+		vim.opt.formatoptions = vim.opt.formatoptions - "r" - "o"
+	end,
+})
+
+
 -- Schemes
 
 -- For Catppuccin
