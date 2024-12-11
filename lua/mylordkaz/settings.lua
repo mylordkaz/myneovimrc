@@ -9,6 +9,7 @@ vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.softtabstop = 2
 vim.opt.smartindent = true
+vim.opt.signcolumn = "no"
 
 
 vim.api.nvim_create_autocmd("BufEnter", {
@@ -19,10 +20,11 @@ vim.api.nvim_create_autocmd("BufEnter", {
 })
 
 
+
 -- Schemes
 
 -- For Catppuccin
-vim.cmd.colorscheme "catppuccin-mocha" -- or catppuccin-latte, catppuccin-frappe, catppuccin-macchiato
+-- vim.cmd.colorscheme "catppuccin-mocha" -- or catppuccin-latte, catppuccin-frappe, catppuccin-macchiato
 
 -- For Sonokai
 -- vim.g.sonokai_style = 'default'  -- or 'atlantis', 'andromeda', 'shusia', 'maia', 'espresso'
@@ -33,3 +35,14 @@ vim.cmd.colorscheme "catppuccin-mocha" -- or catppuccin-latte, catppuccin-frappe
 
 -- For Bluloco
 -- vim.cmd.colorscheme "bluloco"
+
+-- For Modus
+vim.cmd.colorscheme "modus_vivendi"
+
+vim.cmd([[
+	  hi NvimTreeWinSeparator guifg=none guibg=none
+	  hi NvimTreeNormal guibg=none	
+	]])
+
+-- For GitHub Dark Blind
+-- vim.cmd.colorscheme 'github_dark_high_contrast'

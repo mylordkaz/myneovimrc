@@ -79,7 +79,7 @@ return require("lazy").setup({
 			'jayp0521/mason-null-ls.nvim',
 		}
 	},
-	
+
 	{
 		"windwp/nvim-autopairs",
 		config = function()
@@ -96,11 +96,13 @@ return require("lazy").setup({
 
 	-- color schemes
 	'sainnhe/sonokai',
-	{ "catppuccin/nvim", name = "catppuccin" },
+	{ "catppuccin/nvim",              name = "catppuccin" },
 	'tiagovla/tokyodark.nvim',
 	{
 		'uloco/bluloco.nvim',
 		dependencies = { 'rktjmp/lush.nvim' }
-	}
+	},
+	{ "miikanissi/modus-themes.nvim", priority = 1000 },
+	{ 'projekt0n/github-nvim-theme',  name = 'github-theme' }
 
 }, opts)

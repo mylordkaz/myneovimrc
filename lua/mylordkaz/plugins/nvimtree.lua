@@ -4,7 +4,21 @@ require("nvim-tree").setup({
 		width = 30,
 	},
 	renderer = {
-		group_empty = true,
+		indent_markers = {
+			enable = false,
+		},
+		icons = {
+			show = {
+				folder = true,
+				file = true,
+				git = true,
+				folder_arrow = true,
+			},
+		},
+		indent_width = 1,
+		add_trailing = false,
+		group_empty = false,
+		special_files = {},
 	},
 	filters = {
 		dotfiles = false,
