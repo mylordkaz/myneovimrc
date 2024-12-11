@@ -22,7 +22,8 @@ require('mason-lspconfig').setup({
 		'svelte',     -- Svelte
 		'intelephense', -- PHP
 		'eslint',     -- Linting
-		'tailwindcss' -- Tailwind
+		'tailwindcss', -- Tailwind
+		'jsonls'
 	},
 	handlers = {
 		function(server_name)
