@@ -1,83 +1,85 @@
 -- mason.lua
-require('mason').setup()
-require('mason-lspconfig').setup({
+require("mason").setup()
+require("mason-lspconfig").setup({
 	ensure_installed = {
-		'tsserver',  -- JS/TS
-		'eslint',    -- JS/TS linting
-		'gopls',     -- Go
-		'svelte',    -- Svelte
-		'lua_ls',    -- Lua
-		'jsonls',    -- JSON
-		'tailwindcss', -- Tailwind
-	}
+		"ts_ls", -- JS/TS
+		"eslint", -- JS/TS linting
+		"gopls", -- Go
+		"svelte", -- Svelte
+		"lua_ls", -- Lua
+		"jsonls", -- JSON
+		"tailwindcss", -- Tailwind
+	},
 })
 
-local capabilities = require('cmp_nvim_lsp').default_capabilities()
+local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
 -- Shared on_attach function
 local on_attach = function(client, bufnr)
 	local opts = { noremap = true, silent = true, buffer = bufnr }
-	vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
-	vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
-	vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
-	vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
-	vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
-	vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
-	vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, opts)
-	vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
-	vim.keymap.set('n', '<space>f', function() vim.lsp.buf.format { async = true } end, opts)
+	vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+	vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+	vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+	vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
+	vim.keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, opts)
+	vim.keymap.set("n", "<space>rn", vim.lsp.buf.rename, opts)
+	vim.keymap.set("n", "<space>ca", vim.lsp.buf.code_action, opts)
+	vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+	vim.keymap.set("n", "<space>f", function()
+		vim.lsp.buf.format({ async = true })
+	end, opts)
 end
 
 -- Completion configuration
-local cmp = require('cmp')
+local cmp = require("cmp")
 cmp.setup({
 	snippet = {
 		expand = function(args)
-			require('luasnip').lsp_expand(args.body)
+			require("luasnip").lsp_expand(args.body)
 		end,
 	},
 	mapping = cmp.mapping.preset.insert({
-		['<C-u>'] = cmp.mapping.scroll_docs(-4),
-		['<C-d>'] = cmp.mapping.scroll_docs(4),
-		['<C-Space>'] = cmp.mapping.complete(),
-		['<CR>'] = cmp.mapping.confirm({ select = true }),
-		['<Tab>'] = cmp.mapping.select_next_item(),
-		['<S-Tab>'] = cmp.mapping.select_prev_item(),
+		["<C-u>"] = cmp.mapping.scroll_docs(-4),
+		["<C-d>"] = cmp.mapping.scroll_docs(4),
+		["<C-Space>"] = cmp.mapping.complete(),
+		["<CR>"] = cmp.mapping.confirm({ select = true }),
+		["<Tab>"] = cmp.mapping.select_next_item(),
+		["<S-Tab>"] = cmp.mapping.select_prev_item(),
 	}),
 	sources = {
-		{ name = 'nvim_lsp' },
-		{ name = 'luasnip' },
-		{ name = 'buffer' },
-		{ name = 'path' },
+		{ name = "nvim_lsp" },
+		{ name = "luasnip" },
+		{ name = "buffer" },
+		{ name = "path" },
 	},
 })
 
-local lspconfig = require('lspconfig')
+local lspconfig = require("lspconfig")
 
 -- TypeScript/JavaScript configuration
-lspconfig.tsserver.setup({
+lspconfig.ts_ls.setup({
 	capabilities = capabilities,
 	on_attach = on_attach,
 	settings = {
 		typescript = {
 			inlayHints = {
-				includeInlayParameterNameHints = 'all',
+				includeInlayParameterNameHints = "all",
 				includeInlayFunctionParameterTypeHints = true,
 				includeInlayVariableTypeHints = true,
 				includeInlayPropertyDeclarationTypeHints = true,
 				includeInlayFunctionLikeReturnTypeHints = true,
-			}
+			},
 		},
 		javascript = {
 			inlayHints = {
-				includeInlayParameterNameHints = 'all',
+				includeInlayParameterNameHints = "all",
 				includeInlayFunctionParameterTypeHints = true,
 				includeInlayVariableTypeHints = true,
 				includeInlayPropertyDeclarationTypeHints = true,
 				includeInlayFunctionLikeReturnTypeHints = true,
-			}
-		}
-	}
+			},
+		},
+	},
 })
 
 -- Svelte configuration
@@ -102,7 +104,8 @@ lspconfig.lua_ls.setup({
 	settings = {
 		Lua = {
 			diagnostics = {
-				globals = { 'vim', 'it', 'describe', 'before_each', 'after_each' },
+				globals = { "vim", "it", "describe", "before_each", "after_each" },
+				disable = { "missing-fields" },
 			},
 			workspace = {
 				library = vim.api.nvim_get_runtime_file("", true),
@@ -111,8 +114,8 @@ lspconfig.lua_ls.setup({
 			telemetry = {
 				enable = false,
 			},
-		}
-	}
+		},
+	},
 })
 
 -- Go configuration
@@ -144,15 +147,15 @@ lspconfig.gopls.setup({
 })
 
 -- Null-ls configuration for formatters and linters
-local null_ls = require('null-ls')
-require('mason-null-ls').setup({
+local null_ls = require("null-ls")
+require("mason-null-ls").setup({
 	ensure_installed = {
-		'prettier',    -- JS/TS/Svelte formatting
-		'gofmt',       -- Go formatting
-		'golangci-lint', -- Go linting
-		'eslint_d',    -- JS/TS/Svelte linting
-		'stylua',      -- Lua formatting
-	}
+		"prettier", -- JS/TS/Svelte formatting
+		"gofmt", -- Go formatting
+		"golangci-lint", -- Go linting
+		"eslint_d", -- JS/TS/Svelte linting
+		"stylua", -- Lua formatting
+	},
 })
 
 null_ls.setup({
@@ -165,7 +168,7 @@ null_ls.setup({
 		-- Diagnostics
 		null_ls.builtins.diagnostics.eslint_d.with({
 			condition = function(utils)
-				return utils.root_has_file({ '.eslintrc.js', '.eslintrc.json', '.eslintrc' })
+				return utils.root_has_file({ ".eslintrc.js", ".eslintrc.json", ".eslintrc" })
 			end,
 		}),
 		null_ls.builtins.diagnostics.golangci_lint.with({
@@ -199,4 +202,3 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 
 -- Load snippets
 require("luasnip.loaders.from_vscode").lazy_load()
-

@@ -1,16 +1,24 @@
-require('nvim-treesitter.configs').setup {
+require("nvim-treesitter.configs").setup({
 	ensure_installed = {
 		-- Web development
-		"html", "css", "javascript", "typescript",
+		"html",
+		"css",
+		"javascript",
+		"typescript",
 
 		-- Backend
 		"go",
 
 		-- Frameworks
-		"tsx", "svelte",
+		"tsx",
+		"svelte",
 
 		-- Extras that are good to have
-		"json", "yaml", "markdown", "bash", "lua",
+		"json",
+		"yaml",
+		"markdown",
+		"bash",
+		"lua",
 	},
 
 	sync_install = false,
@@ -22,11 +30,6 @@ require('nvim-treesitter.configs').setup {
 	},
 
 	indent = {
-		enable = true
+		enable = true,
 	},
-
-	-- Optional: Enable code folding
-	fold = {
-		enable = true
-	}
-}
+})
