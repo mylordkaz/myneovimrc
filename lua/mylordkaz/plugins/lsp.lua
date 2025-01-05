@@ -118,6 +118,10 @@ require('mason-lspconfig').setup({
 					gopls = {
 						analyses = {
 							unusedparams = true,
+							unusedwrite = false,
+							nilness = true,
+							shadow = true,
+							useany = true,
 						},
 						staticcheck = true,
 						gofumpt = true,
@@ -182,8 +186,13 @@ null_ls.setup({
 
 		-- Diagnostics
 		null_ls.builtins.diagnostics.eslint_d,
-		null_ls.builtins.diagnostics.golangci_lint,
-
+		null_ls.builtins.diagnostics.golangci_lint.with({
+			diagnostics_format = "[#{c}] #{m} (#{s})",
+			extra_args = {
+				"--disable=errcheck",            -- Disable error checking warnings
+				"--disable=staticcheck",         -- Optional: disable staticcheck if too noisy
+			},
+		}),
 	},
 	debug = false,
 })
