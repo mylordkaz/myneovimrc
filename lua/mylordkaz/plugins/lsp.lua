@@ -181,7 +181,7 @@ require("mason-null-ls").setup({
 		"eslint_d",
 
 		-- PHP
-		"phpcs",
+		"php-cs-fixer",
 		"blade-formatter",
 
 		-- SCSS/CSS
@@ -199,7 +199,6 @@ null_ls.setup({
 			extra_args = { "--single-quote", "--jsx-single-quote" }
 		}),
 		null_ls.builtins.formatting.blade_formatter,
-		null_ls.builtins.formatting.phpcs,
 		null_ls.builtins.formatting.stylelint,
 		null_ls.builtins.formatting.stylua,
 
@@ -209,7 +208,6 @@ null_ls.setup({
 				return utils.root_has_file({ ".eslintrc.js", ".eslintrc.json", ".eslintrc" })
 			end,
 		}),
-		null_ls.builtins.diagnostics.phpcs,
 		null_ls.builtins.diagnostics.stylelint,
 	},
 })
