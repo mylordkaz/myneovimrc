@@ -10,6 +10,18 @@ vim.opt.shiftwidth = 2
 vim.opt.softtabstop = 2
 vim.opt.smartindent = true
 vim.opt.signcolumn = "no"
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "nvim_treesitter#foldexpr"
+
+-- config diag display
+vim.diagnostic.config({
+	float = {
+		border = "rounded",
+		source = true,
+	},
+	virtual_text = false,
+	signs = true,
+})
 
 
 vim.api.nvim_create_autocmd("BufEnter", {

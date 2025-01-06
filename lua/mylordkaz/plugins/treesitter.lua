@@ -1,18 +1,33 @@
 require('nvim-treesitter.configs').setup {
 	ensure_installed = {
-		-- Web development
-		"html", "css", "javascript", "typescript",
+		-- JavaScript/TypeScript
+		"javascript",
+		"typescript",
+		"tsx",
 
-		-- Backend
-		"go",
+		-- PHP related
+		"php",
+		"phpdoc",
 
-		-- Frameworks
-		"tsx", "svelte",
 
-		-- Extras that are good to have
-		"json", "yaml", "markdown", "bash", "lua",
+		-- Styling
+		"css",
+		"scss",
+
+		-- Docker
+		"dockerfile",
+
+		-- Configuration
+		"json",
+		"yaml",
+		"toml",
+
+		-- Others
+		"html",
+		"markdown",
+		"bash",
+		"lua",
 	},
-
 	sync_install = false,
 	auto_install = true,
 
@@ -25,8 +40,4 @@ require('nvim-treesitter.configs').setup {
 		enable = true
 	},
 
-	-- Optional: Enable code folding
-	fold = {
-		enable = true
-	}
 }

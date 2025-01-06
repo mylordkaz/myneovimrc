@@ -1,207 +1,223 @@
-local lsp_zero = require('lsp-zero')
-local cmp = require('cmp')
-local null_ls = require('null-ls')
-
--- LSP Configuration
-lsp_zero.extend_lspconfig({
-	capabilities = require('cmp_nvim_lsp').default_capabilities(),
-	lsp_attach = function(client, bufnr)
-		lsp_zero.default_keymaps({ buffer = bufnr })
-	end,
-	float_border = 'rounded',
-	sign_text = true,
-})
-
--- Mason Setup
-require('mason').setup({})
-require('mason-lspconfig').setup({
+require("mason").setup()
+require("mason-lspconfig").setup({
 	ensure_installed = {
-		'ts_ls',      -- JS/TS
-		'lua_ls',     -- Lua
-		'gopls',      -- Go
-		'svelte',     -- Svelte
-		'intelephense', -- PHP
-		'eslint',     -- Linting
-		'tailwindcss', -- Tailwind
-		'jsonls'
+		-- JavaScript/TypeScript
+		"ts_ls",
+		"eslint",
+		"tailwindcss",
+
+		-- PHP
+		"intelephense", -- PHP LSP
+
+		-- Docker
+		"dockerls",
+		"docker_compose_language_service",
+
+		-- CSS/SCSS
+		"cssls",
+
+		-- Others
+		"jsonls",
+		"lua_ls",
 	},
-	handlers = {
-		function(server_name)
-			require('lspconfig')[server_name].setup({})
-		end,
-		["lua_ls"] = function()
-			local lspconfig = require("lspconfig")
-			lspconfig.lua_ls.setup {
-				settings = {
-					Lua = {
-						diagnostics = {
-							globals = { "vim", "it", "describe", "before_each", "after_each" },
-						}
-					}
-				}
-			}
-		end,
-
-		-- TypeScript config
-		ts_ls = function()
-			require('lspconfig').ts_ls.setup({
-				settings = {
-					typescript = {
-						inlayHints = {
-							includeInlayParameterNameHints = 'all',
-							includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-							includeInlayFunctionParameterTypeHints = true,
-							includeInlayVariableTypeHints = true,
-							includeInlayPropertyDeclarationTypeHints = true,
-							includeInlayFunctionLikeReturnTypeHints = true,
-							includeInlayEnumMemberValueHints = true,
-						}
-					},
-					javascript = {
-						inlayHints = {
-							includeInlayParameterNameHints = 'all',
-							includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-							includeInlayFunctionParameterTypeHints = true,
-							includeInlayVariableTypeHints = true,
-							includeInlayPropertyDeclarationTypeHints = true,
-							includeInlayFunctionLikeReturnTypeHints = true,
-							includeInlayEnumMemberValueHints = true,
-						}
-					}
-				}
-			})
-		end,
-
-		-- Tailwind config
-		tailwindcss = function()
-			require('lspconfig').tailwindcss.setup({
-				settings = {
-					tailwindCSS = {
-						experimental = {
-							classRegex = {
-								"tw`([^`]*)",     -- tw`...`
-								'tw="([^"]*)',    -- <div tw="..." />
-								'tw={"([^"}]*)',  -- <div tw={"..."} />
-								"tw\\.\\w+`([^`]*)", -- tw.xxx`...`
-								"tw\\(.*?\\)`([^`]*)", -- tw(..)`...`
-								"className=\"([^\"]*)", -- className="..."
-								"className={\"([^\"}]*)", -- className={"..."}
-								"class=\"([^\"]*)", -- class="..."
-								"class={\"([^\"}]*)", -- class={"..."}
-							},
-						},
-						validate = true,
-					},
-				},
-			})
-		end,
-
-		-- Svelte config
-		svelte = function()
-			require('lspconfig').svelte.setup({
-				settings = {
-					svelte = {
-						plugin = {
-							typescript = {
-								enabled = true,
-							},
-						},
-					},
-				},
-			})
-		end,
-
-		-- Golang config
-		gopls = function()
-			require('lspconfig').gopls.setup({
-				settings = {
-					gopls = {
-						analyses = {
-							unusedparams = true,
-							unusedwrite = false,
-							nilness = true,
-							shadow = true,
-							useany = true,
-						},
-						staticcheck = true,
-						gofumpt = true,
-						usePlaceholders = true,
-						hints = {
-							assignVariableTypes = true,
-							compositeLiteralFields = true,
-							compositeLiteralTypes = true,
-							constantValues = true,
-							functionTypeParameters = true,
-							parameterNames = true,
-							rangeVariableTypes = true,
-						},
-					},
-				},
-			})
-		end,
-	}
 })
 
--- Completion Setup
+local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+-- Shared on_attach function
+local on_attach = function(client, bufnr)
+	local opts = { noremap = true, silent = true, buffer = bufnr }
+	vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+	vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+	vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+	vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
+	vim.keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, opts)
+	vim.keymap.set("n", "<space>rn", vim.lsp.buf.rename, opts)
+	vim.keymap.set("n", "<space>ca", vim.lsp.buf.code_action, opts)
+	vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+	vim.keymap.set("n", "<space>f", function()
+		vim.lsp.buf.format({ async = true })
+	end, opts)
+end
+
+-- Completion configuration
+local cmp = require("cmp")
 cmp.setup({
-	sources = {
-		{ name = 'path' },
-		{ name = 'nvim_lsp' },
-		{ name = 'buffer',  keyword_length = 3 },
-		{ name = 'luasnip', keyword_length = 2 },
-	},
-	formatting = lsp_zero.cmp_format(),
-	mapping = cmp.mapping.preset.insert({
-		['<C-u>'] = cmp.mapping.scroll_docs(-4),
-		['<C-d>'] = cmp.mapping.scroll_docs(4),
-		['<C-Space>'] = cmp.mapping.complete(),
-		['<CR>'] = cmp.mapping.confirm({ select = true }),
-		['<Tab>'] = cmp.mapping.select_next_item(),
-		['<S-Tab>'] = cmp.mapping.select_prev_item(),
-	}),
 	snippet = {
 		expand = function(args)
-			require('luasnip').lsp_expand(args.body)
+			require("luasnip").lsp_expand(args.body)
 		end,
+	},
+	mapping = cmp.mapping.preset.insert({
+		["<C-u>"] = cmp.mapping.scroll_docs(-4),
+		["<C-d>"] = cmp.mapping.scroll_docs(4),
+		["<C-Space>"] = cmp.mapping.complete(),
+		["<CR>"] = cmp.mapping.confirm({ select = true }),
+		["<Tab>"] = cmp.mapping.select_next_item(),
+		["<S-Tab>"] = cmp.mapping.select_prev_item(),
+	}),
+	sources = {
+		{ name = "nvim_lsp" },
+		{ name = "luasnip" },
+		{ name = "buffer" },
+		{ name = "path" },
+	},
+})
+
+local lspconfig = require("lspconfig")
+
+-- TypeScript/JavaScript configuration
+lspconfig.ts_ls.setup({
+	capabilities = capabilities,
+	on_attach = on_attach,
+	settings = {
+		typescript = {
+			inlayHints = {
+				includeInlayParameterNameHints = "all",
+				includeInlayFunctionParameterTypeHints = true,
+				includeInlayVariableTypeHints = true,
+				includeInlayPropertyDeclarationTypeHints = true,
+				includeInlayFunctionLikeReturnTypeHints = true,
+			},
+		},
+		javascript = {
+			inlayHints = {
+				includeInlayParameterNameHints = "all",
+				includeInlayFunctionParameterTypeHints = true,
+				includeInlayVariableTypeHints = true,
+				includeInlayPropertyDeclarationTypeHints = true,
+				includeInlayFunctionLikeReturnTypeHints = true,
+			},
+		},
+	},
+})
+
+-- PHP configuration
+lspconfig.intelephense.setup({
+	capabilities = capabilities,
+	on_attach = on_attach,
+	settings = {
+		intelephense = {
+			files = {
+				maxSize = 1000000,
+			},
+			environment = {
+				includePaths = { "/path/to/your/project/vendor" }, -- Adjust this path
+			},
+			stubs = {
+				"apache", "bcmath", "bz2", "calendar", "com_dotnet", "Core", "curl", "date",
+				"dba", "dom", "enchant", "exif", "fileinfo", "filter", "fpm", "ftp", "gd",
+				"hash", "iconv", "imap", "interbase", "intl", "json", "ldap", "libxml",
+				"mbstring", "mcrypt", "meta", "mssql", "mysqli", "oci8", "odbc", "openssl",
+				"pcntl", "pcre", "PDO", "pdo_ibm", "pdo_mysql", "pdo_pgsql", "pdo_sqlite",
+				"pgsql", "Phar", "posix", "pspell", "readline", "recode", "Reflection",
+				"regex", "session", "shmop", "SimpleXML", "snmp", "soap", "sockets", "sodium",
+				"SPL", "sqlite3", "standard", "superglobals", "sybase", "sysvmsg", "sysvsem",
+				"sysvshm", "tidy", "tokenizer", "wddx", "xml", "xmlreader", "xmlrpc",
+				"xmlwriter", "xsl", "Zend OPcache", "zip", "zlib"
+			},
+		},
+	},
+})
+
+-- CSS/SCSS configuration
+lspconfig.cssls.setup({
+	capabilities = capabilities,
+	on_attach = on_attach,
+	settings = {
+		css = {
+			validate = true
+		},
+		scss = {
+			validate = true
+		}
 	}
 })
 
--- Formatting and Linting Setup
-require('mason-null-ls').setup({
+-- Tailwind CSS configuration
+lspconfig.tailwindcss.setup({
+	capabilities = capabilities,
+	on_attach = on_attach,
+})
+
+-- Docker configuration
+lspconfig.dockerls.setup({
+	capabilities = capabilities,
+	on_attach = on_attach,
+})
+
+lspconfig.docker_compose_language_service.setup({
+	capabilities = capabilities,
+	on_attach = on_attach,
+})
+
+-- Lua configuration
+lspconfig.lua_ls.setup({
+	capabilities = capabilities,
+	on_attach = on_attach,
+	settings = {
+		Lua = {
+			diagnostics = {
+				globals = { "vim", "it", "describe", "before_each", "after_each" },
+				disable = { "missing-fields" },
+			},
+			workspace = {
+				library = vim.api.nvim_get_runtime_file("", true),
+				checkThirdParty = false,
+			},
+			telemetry = {
+				enable = false,
+			},
+		},
+	},
+})
+
+-- Null-ls configuration for formatters and linters
+local null_ls = require("null-ls")
+require("mason-null-ls").setup({
 	ensure_installed = {
-		'prettier',
-		'gofmt',
-		'golangci-lint',
-		'eslint_d',
-		'php-cs-fixer',
-	}
+		-- JavaScript/TypeScript
+		"prettier",
+		"eslint_d",
+
+		-- PHP
+		"phpcs",
+		"blade-formatter",
+
+		-- SCSS/CSS
+		"stylelint",
+
+		-- Lua
+		"stylua",
+	},
 })
 
 null_ls.setup({
 	sources = {
 		-- Formatting
-		null_ls.builtins.formatting.prettier, -- Default settings
-		null_ls.builtins.formatting.gofmt,
-		null_ls.builtins.formatting.phpcsfixer,
+		null_ls.builtins.formatting.prettier.with({
+			extra_args = { "--single-quote", "--jsx-single-quote" }
+		}),
+		null_ls.builtins.formatting.blade_formatter,
+		null_ls.builtins.formatting.phpcs,
+		null_ls.builtins.formatting.stylelint,
+		null_ls.builtins.formatting.stylua,
 
 		-- Diagnostics
-		null_ls.builtins.diagnostics.eslint_d,
-		null_ls.builtins.diagnostics.golangci_lint.with({
-			diagnostics_format = "[#{c}] #{m} (#{s})",
-			extra_args = {
-				"--disable=errcheck",            -- Disable error checking warnings
-				"--disable=staticcheck",         -- Optional: disable staticcheck if too noisy
-			},
+		null_ls.builtins.diagnostics.eslint_d.with({
+			condition = function(utils)
+				return utils.root_has_file({ ".eslintrc.js", ".eslintrc.json", ".eslintrc" })
+			end,
 		}),
+		null_ls.builtins.diagnostics.phpcs,
+		null_ls.builtins.diagnostics.stylelint,
 	},
-	debug = false,
 })
 
 -- Format on save
 vim.api.nvim_create_autocmd("BufWritePre", {
 	pattern = { "*" },
 	callback = function(args)
-		-- Only format if a formatter is available for the current filetype
 		local filetype = vim.bo[args.buf].filetype
 		local have_nls = #require("null-ls.sources").get_available(filetype, "NULL_LS_FORMATTING") > 0
 
@@ -209,7 +225,6 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 			bufnr = args.buf,
 			timeout_ms = 3000,
 			filter = function(client)
-				-- Use null-ls when available, otherwise use the first available formatter
 				if have_nls then
 					return client.name == "null-ls"
 				end
