@@ -98,23 +98,9 @@ lspconfig.intelephense.setup({
 	on_attach = on_attach,
 	settings = {
 		intelephense = {
+			filetypes = { "php", "blade", "php_only" },
 			files = {
 				maxSize = 1000000,
-			},
-			environment = {
-				includePaths = { "/path/to/your/project/vendor" }, -- Adjust this path
-			},
-			stubs = {
-				"apache", "bcmath", "bz2", "calendar", "com_dotnet", "Core", "curl", "date",
-				"dba", "dom", "enchant", "exif", "fileinfo", "filter", "fpm", "ftp", "gd",
-				"hash", "iconv", "imap", "interbase", "intl", "json", "ldap", "libxml",
-				"mbstring", "mcrypt", "meta", "mssql", "mysqli", "oci8", "odbc", "openssl",
-				"pcntl", "pcre", "PDO", "pdo_ibm", "pdo_mysql", "pdo_pgsql", "pdo_sqlite",
-				"pgsql", "Phar", "posix", "pspell", "readline", "recode", "Reflection",
-				"regex", "session", "shmop", "SimpleXML", "snmp", "soap", "sockets", "sodium",
-				"SPL", "sqlite3", "standard", "superglobals", "sybase", "sysvmsg", "sysvsem",
-				"sysvshm", "tidy", "tokenizer", "wddx", "xml", "xmlreader", "xmlrpc",
-				"xmlwriter", "xsl", "Zend OPcache", "zip", "zlib"
 			},
 		},
 	},
@@ -126,12 +112,12 @@ lspconfig.cssls.setup({
 	on_attach = on_attach,
 	settings = {
 		css = {
-			validate = true
+			validate = true,
 		},
 		scss = {
-			validate = true
-		}
-	}
+			validate = true,
+		},
+	},
 })
 
 -- Tailwind CSS configuration
@@ -181,7 +167,7 @@ require("mason-null-ls").setup({
 		"eslint_d",
 
 		-- PHP
-		"php-cs-fixer",
+		"pint",
 		"blade-formatter",
 
 		-- SCSS/CSS
@@ -196,8 +182,9 @@ null_ls.setup({
 	sources = {
 		-- Formatting
 		null_ls.builtins.formatting.prettier.with({
-			extra_args = { "--single-quote", "--jsx-single-quote" }
+			extra_args = { "--single-quote", "false" },
 		}),
+		null_ls.builtins.formatting.pint,
 		null_ls.builtins.formatting.blade_formatter,
 		null_ls.builtins.formatting.stylelint,
 		null_ls.builtins.formatting.stylua,
