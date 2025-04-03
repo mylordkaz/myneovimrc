@@ -12,6 +12,7 @@ require("nvim-treesitter.configs").setup({
 		-- Frameworks
 		"tsx",
 		"svelte",
+		"astro",
 
 		-- Extras that are good to have
 		"json",

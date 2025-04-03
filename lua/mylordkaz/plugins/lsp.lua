@@ -9,6 +9,7 @@ require("mason-lspconfig").setup({
 		"lua_ls", -- Lua
 		"jsonls", -- JSON
 		"tailwindcss", -- Tailwind
+		"astro", -- Astro
 	},
 })
 
@@ -144,6 +145,12 @@ lspconfig.gopls.setup({
 			},
 		},
 	},
+})
+
+-- Astro configuration
+lspconfig.astro.setup({
+	capabilities = capabilities,
+	on_attach = on_attach,
 })
 
 -- Null-ls configuration for formatters and linters
