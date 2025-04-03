@@ -10,16 +10,24 @@ vim.opt.shiftwidth = 2
 vim.opt.softtabstop = 2
 vim.opt.smartindent = true
 vim.opt.signcolumn = "no"
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "nvim_treesitter#foldexpr"
 
-
+-- config diag display
+vim.diagnostic.config({
+	float = {
+		border = "rounded",
+		source = true,
+	},
+	virtual_text = false,
+	signs = true,
+})
 vim.api.nvim_create_autocmd("BufEnter", {
 	pattern = "*",
 	callback = function()
 		vim.opt.formatoptions = vim.opt.formatoptions - "r" - "o"
 	end,
 })
-
-
 
 -- Schemes
 
@@ -37,7 +45,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
 -- vim.cmd.colorscheme "bluloco"
 
 -- For Modus
-vim.cmd.colorscheme "modus_vivendi"
+vim.cmd.colorscheme("modus_vivendi")
 
 vim.cmd([[
 	  hi NvimTreeWinSeparator guifg=none guibg=none
