@@ -168,11 +168,14 @@ require("mason-null-ls").setup({
 null_ls.setup({
 	sources = {
 		-- Formatting
-		null_ls.builtins.formatting.prettier,
+		null_ls.builtins.formatting.prettier.with({
+			extra_args = { "--plugin=prettier-plugin-solidity" },
+		}),
 		null_ls.builtins.formatting.gofmt,
 		null_ls.builtins.formatting.stylua,
 
 		-- Diagnostics
+		null_ls.builtins.diagnostics.solhint,
 		null_ls.builtins.diagnostics.eslint_d.with({
 			condition = function(utils)
 				return utils.root_has_file({ ".eslintrc.js", ".eslintrc.json", ".eslintrc" })

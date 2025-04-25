@@ -14,6 +14,8 @@ require("nvim-treesitter.configs").setup({
 		"svelte",
 		"astro",
 
+		"solidity",
+
 		-- Extras that are good to have
 		"json",
 		"yaml",

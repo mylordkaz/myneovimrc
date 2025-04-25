@@ -87,6 +87,12 @@ return require("lazy").setup({
 		lazy = false,
 	},
 
+	--web3
+	{
+		"tomlion/vim-solidity",
+		ft = "solidity",
+	},
+
 	-- color schemes
 	"sainnhe/sonokai",
 	{ "catppuccin/nvim", name = "catppuccin" },
