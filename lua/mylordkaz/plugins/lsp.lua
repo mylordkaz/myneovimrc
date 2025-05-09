@@ -19,6 +19,7 @@ require("mason-lspconfig").setup({
 		-- Others
 		"jsonls",
 		"lua_ls",
+		"efm",
 	},
 })
 
@@ -158,65 +159,83 @@ lspconfig.lua_ls.setup({
 	},
 })
 
--- Null-ls configuration for formatters and linters
-local null_ls = require("null-ls")
-require("mason-null-ls").setup({
-	ensure_installed = {
-		-- JavaScript/TypeScript
-		"prettier",
-		"eslint_d",
+local prettier = {
+    formatCommand = "prettier --stdin-filepath ${INPUT} --single-quote false",
+    formatStdin = true,
+}
 
-		-- PHP
-		"pint",
-		"blade-formatter",
+local eslint = {
+    lintCommand = "eslint_d -f unix --stdin --stdin-filename ${INPUT}",
+    lintStdin = true,
+    lintFormats = {"%f:%l:%c: %m"},
+    lintIgnoreExitCode = true,
+}
 
-		-- SCSS/CSS
-		"stylelint",
+local stylelint = {
+    lintCommand = "stylelint --formatter unix --stdin-filename ${INPUT} --stdin",
+    lintStdin = true,
+    lintFormats = {"%f:%l:%c: %m"},
+    lintIgnoreExitCode = true,
+    formatCommand = "stylelint --fix --stdin-filename ${INPUT} --stdin",
+    formatStdin = true,
+}
 
-		-- Lua
-		"stylua",
-	},
+local pint = {
+    formatCommand = "pint ${INPUT}",
+    formatStdin = false,
+}
+
+local blade_formatter = {
+    formatCommand = "blade-formatter --stdin",
+    formatStdin = true,
+}
+
+local stylua = {
+    formatCommand = "stylua --stdin-filepath ${INPUT} -",
+    formatStdin = true,
+}
+
+-- efm with formatters and linters
+lspconfig.efm.setup({
+    capabilities = capabilities,
+    on_attach = on_attach,
+    init_options = {documentFormatting = true},
+    filetypes = {"javascript", "typescript", "typescriptreact", "javascriptreact", "php", "lua", "blade", "css", "scss", "json", "yaml"},
+    settings = {
+        rootMarkers = {".git/"},
+        languages = {
+            javascript = {prettier, eslint},
+            typescript = {prettier, eslint},
+            typescriptreact = {prettier, eslint},
+            javascriptreact = {prettier, eslint},
+            php = {pint},
+            blade = {blade_formatter},
+            css = {prettier, stylelint},
+            scss = {prettier, stylelint},
+            lua = {stylua},
+            json = {prettier},
+            yaml = {prettier},
+        }
+    }
 })
 
-null_ls.setup({
-	sources = {
-		-- Formatting
-		null_ls.builtins.formatting.prettier.with({
-			extra_args = { "--single-quote", "false" },
-		}),
-		null_ls.builtins.formatting.pint,
-		null_ls.builtins.formatting.blade_formatter,
-		null_ls.builtins.formatting.stylelint,
-		null_ls.builtins.formatting.stylua,
 
-		-- Diagnostics
-		null_ls.builtins.diagnostics.eslint_d.with({
-			condition = function(utils)
-				return utils.root_has_file({ ".eslintrc.js", ".eslintrc.json", ".eslintrc" })
-			end,
-		}),
-		null_ls.builtins.diagnostics.stylelint,
-	},
-})
 
 -- Format on save
 vim.api.nvim_create_autocmd("BufWritePre", {
-	pattern = { "*" },
-	callback = function(args)
-		local filetype = vim.bo[args.buf].filetype
-		local have_nls = #require("null-ls.sources").get_available(filetype, "NULL_LS_FORMATTING") > 0
-
-		vim.lsp.buf.format({
-			bufnr = args.buf,
-			timeout_ms = 3000,
-			filter = function(client)
-				if have_nls then
-					return client.name == "null-ls"
-				end
-				return client.name ~= "null-ls"
-			end,
-		})
-	end,
+    pattern = { "*" },
+    callback = function(args)
+        local filetype = vim.bo[args.buf].filetype
+        
+        vim.lsp.buf.format({
+            bufnr = args.buf,
+            timeout_ms = 3000,
+            filter = function(client)
+                -- Prefer efm for formatting
+                return client.name == "efm"
+            end,
+        })
+    end,
 })
 
 -- Load snippets

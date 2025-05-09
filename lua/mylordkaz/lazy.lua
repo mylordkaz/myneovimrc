@@ -68,8 +68,6 @@ return require("lazy").setup({
 			'L3MON4D3/LuaSnip',
 			'saadparwaiz1/cmp_luasnip',
 			'rafamadriz/friendly-snippets',
-			'jose-elias-alvarez/null-ls.nvim',
-			'jayp0521/mason-null-ls.nvim',
 		}
 	},
 
