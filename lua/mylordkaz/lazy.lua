@@ -1,5 +1,5 @@
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
 	vim.fn.system({
 		"git",
 		"clone",
@@ -68,8 +68,6 @@ return require("lazy").setup({
 			"L3MON4D3/LuaSnip",
 			"saadparwaiz1/cmp_luasnip",
 			"rafamadriz/friendly-snippets",
-			"jose-elias-alvarez/null-ls.nvim",
-			"jayp0521/mason-null-ls.nvim",
 			"wuelnerdotexe/vim-astro",
 		},
 	},
@@ -85,12 +83,6 @@ return require("lazy").setup({
 		"numToStr/Comment.nvim",
 		config = true,
 		lazy = false,
-	},
-
-	--web3
-	{
-		"tomlion/vim-solidity",
-		ft = "solidity",
 	},
 
 	-- color schemes

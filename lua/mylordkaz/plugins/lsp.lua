@@ -10,6 +10,8 @@ require("mason-lspconfig").setup({
 		"jsonls", -- JSON
 		"tailwindcss", -- Tailwind
 		"astro", -- Astro
+		"solidity_ls", -- Solidity
+		"efm",
 	},
 })
 
@@ -147,66 +149,106 @@ lspconfig.gopls.setup({
 	},
 })
 
+-- Solidity
+lspconfig.solidity_ls.setup({
+	capabilities = capabilities,
+	on_attach = on_attach,
+	filetypes = { "solidity" },
+	root_dir = lspconfig.util.root_pattern("hardhat.config.*", "foundry.toml", "remappings.txt", ".git"),
+	settings = {
+		solidity = {
+			includePath = "",
+			remappings = {
+				["@openzeppelin/"] = "lib/openzeppelin-contracts/",
+				["account-abstraction/"] = "lib/account-abstraction/",
+			},
+		},
+	},
+})
+
 -- Astro configuration
 lspconfig.astro.setup({
 	capabilities = capabilities,
 	on_attach = on_attach,
 })
 
--- Null-ls configuration for formatters and linters
-local null_ls = require("null-ls")
-require("mason-null-ls").setup({
-	ensure_installed = {
-		"prettier", -- JS/TS/Svelte formatting
-		"gofmt", -- Go formatting
-		"golangci-lint", -- Go linting
-		"eslint_d", -- JS/TS/Svelte linting
-		"stylua", -- Lua formatting
+local languages = {
+	lua = {
+		{
+			formatCommand = "stylua --search-parent-directories --stdin-filepath ${INPUT} -",
+			formatStdin = true,
+		},
 	},
-})
-
-null_ls.setup({
-	sources = {
-		-- Formatting
-		null_ls.builtins.formatting.prettier.with({
-			extra_args = { "--plugin=prettier-plugin-solidity" },
-		}),
-		null_ls.builtins.formatting.gofmt,
-		null_ls.builtins.formatting.stylua,
-
-		-- Diagnostics
-		null_ls.builtins.diagnostics.solhint,
-		null_ls.builtins.diagnostics.eslint_d.with({
-			condition = function(utils)
-				return utils.root_has_file({ ".eslintrc.js", ".eslintrc.json", ".eslintrc" })
-			end,
-		}),
-		null_ls.builtins.diagnostics.golangci_lint.with({
-			diagnostics_format = "[#{c}] #{m} (#{s})",
-			extra_args = {
-				"--disable=errcheck",
-			},
-		}),
+	javascript = {
+		{
+			formatCommand = "prettierd ${INPUT}",
+			formatStdin = true,
+		},
+		{
+			lintCommand = "eslint_d --format unix --stdin --stdin-filename ${INPUT}",
+			lintStdin = true,
+			lintFormats = { "%f:%l:%c: %m" },
+			lintIgnoreExitCode = true,
+		},
 	},
+	typescript = {
+		{
+			formatCommand = "prettierd ${INPUT}",
+			formatStdin = true,
+		},
+		{
+			lintCommand = "eslint_d --format unix --stdin --stdin-filename ${INPUT}",
+			lintStdin = true,
+			lintFormats = { "%f:%l:%c: %m" },
+			lintIgnoreExitCode = true,
+		},
+	},
+	json = {
+		{
+			formatCommand = "prettierd ${INPUT}",
+			formatStdin = true,
+		},
+	},
+	solidity = {
+		{
+			formatCommand = "prettierd ${INPUT} --plugin=prettier-plugin-solidity",
+			formatStdin = true,
+		},
+		{
+			lintCommand = "solhint --formatter unix ${INPUT}",
+			lintStdin = false,
+			lintFormats = { "%f:%l:%c: %m" },
+		},
+	},
+	go = {
+		{
+			formatCommand = "gofmt -s",
+			formatStdin = true,
+		},
+		{
+			lintCommand = "golangci-lint run --out-format line-number --disable=errcheck ${INPUT}",
+			lintStdin = false,
+			lintFormats = { "%f:%l:%c: %m" },
+		},
+	},
+}
+
+lspconfig.efm.setup({
+	init_options = { documentFormatting = true, codeAction = true },
+	filetypes = { "lua", "javascript", "typescript", "json", "solidity", "go" },
+	settings = {
+		rootMarkers = { ".git/" },
+		languages = languages,
+	},
+	capabilities = capabilities,
+	on_attach = on_attach,
 })
 
 -- Format on save
 vim.api.nvim_create_autocmd("BufWritePre", {
-	pattern = { "*" },
-	callback = function(args)
-		local filetype = vim.bo[args.buf].filetype
-		local have_nls = #require("null-ls.sources").get_available(filetype, "NULL_LS_FORMATTING") > 0
-
-		vim.lsp.buf.format({
-			bufnr = args.buf,
-			timeout_ms = 3000,
-			filter = function(client)
-				if have_nls then
-					return client.name == "null-ls"
-				end
-				return client.name ~= "null-ls"
-			end,
-		})
+	pattern = { "*.lua", "*.js", "*.ts", "*.json", "*.sol", "*.go" },
+	callback = function()
+		vim.lsp.buf.format({ timeout_ms = 3000 })
 	end,
 })
 

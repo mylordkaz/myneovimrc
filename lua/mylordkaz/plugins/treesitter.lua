@@ -1,4 +1,5 @@
 require("nvim-treesitter.configs").setup({
+	build = ":TSUpdate",
 	ensure_installed = {
 		-- Web development
 		"html",
@@ -14,17 +15,16 @@ require("nvim-treesitter.configs").setup({
 		"svelte",
 		"astro",
 
-		"solidity",
-
 		-- Extras that are good to have
 		"json",
 		"yaml",
 		"markdown",
 		"bash",
 		"lua",
+		"gitignore",
+		"solidity",
 	},
 
-	sync_install = false,
 	auto_install = true,
 
 	highlight = {
