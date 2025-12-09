@@ -1,5 +1,4 @@
 require("nvim-treesitter.configs").setup({
-	build = ":TSUpdate",
 	ensure_installed = {
 		-- Web development
 		"html",
@@ -14,6 +13,9 @@ require("nvim-treesitter.configs").setup({
 		"tsx",
 		"svelte",
 		"astro",
+
+		-- Mobile
+		"dart",
 
 		-- Extras that are good to have
 		"json",
@@ -35,4 +37,5 @@ require("nvim-treesitter.configs").setup({
 	indent = {
 		enable = true,
 	},
+
 })
