@@ -1,3 +1,5 @@
+-- lsp.lua - Complete replacement
+
 require("mason").setup()
 require("mason-lspconfig").setup({
 	ensure_installed = {
@@ -7,7 +9,7 @@ require("mason-lspconfig").setup({
 		"tailwindcss",
 
 		-- PHP
-		"intelephense", -- PHP LSP
+		"intelephense",
 
 		-- Docker
 		"dockerls",
@@ -65,10 +67,13 @@ cmp.setup({
 	},
 })
 
-local lspconfig = require("lspconfig")
+local function setup_server(name, config)
+	vim.lsp.config(name, config)
+	vim.lsp.enable(name)
+end
 
 -- TypeScript/JavaScript configuration
-lspconfig.ts_ls.setup({
+setup_server("ts_ls", {
 	capabilities = capabilities,
 	on_attach = on_attach,
 	settings = {
@@ -94,7 +99,7 @@ lspconfig.ts_ls.setup({
 })
 
 -- PHP configuration
-lspconfig.intelephense.setup({
+setup_server("intelephense", {
 	capabilities = capabilities,
 	on_attach = on_attach,
 	settings = {
@@ -103,12 +108,98 @@ lspconfig.intelephense.setup({
 			files = {
 				maxSize = 1000000,
 			},
+			stubs = {
+				-- Add Laravel stubs (this is the key part)
+				"apache",
+				"bcmath",
+				"bz2",
+				"calendar",
+				"Core",
+				"ctype",
+				"curl",
+				"date",
+				"dba",
+				"dom",
+				"enchant",
+				"exif",
+				"fileinfo",
+				"filter",
+				"fpm",
+				"ftp",
+				"gd",
+				"gettext",
+				"gmp",
+				"hash",
+				"iconv",
+				"imap",
+				"intl",
+				"json",
+				"ldap",
+				"libxml",
+				"mbstring",
+				"mysqli",
+				"oci8",
+				"odbc",
+				"openssl",
+				"pcntl",
+				"pcre",
+				"PDO",
+				"pdo_mysql",
+				"pdo_pgsql",
+				"pdo_sqlite",
+				"pgsql",
+				"Phar",
+				"posix",
+				"pspell",
+				"readline",
+				"Reflection",
+				"session",
+				"shmop",
+				"SimpleXML",
+				"soap",
+				"sockets",
+				"sodium",
+				"SPL",
+				"sqlite3",
+				"standard",
+				"superglobals",
+				"sysvmsg",
+				"sysvsem",
+				"sysvshm",
+				"tidy",
+				"tokenizer",
+				"xml",
+				"xmlreader",
+				"xmlrpc",
+				"xmlwriter",
+				"xsl",
+				"Zend OPcache",
+				"zip",
+				"zlib",
+				"laravel",
+				"phpunit",
+			},
+			environment = {
+				-- Include Laravel framework
+				includePaths = {
+					"/vendor/laravel/framework/src",
+				},
+			},
+			diagnostics = {
+				-- Optionally, ignore undefined class errors if needed
+				undefinedClassConstants = false,
+				undefinedConstants = false,
+				undefinedFunctions = false,
+				undefinedMethods = false,
+				undefinedProperties = false,
+				undefinedTypes = false,
+			},
 		},
 	},
 })
 
 -- CSS/SCSS configuration
-lspconfig.cssls.setup({
+setup_server("cssls", {
 	capabilities = capabilities,
 	on_attach = on_attach,
 	settings = {
@@ -122,24 +213,24 @@ lspconfig.cssls.setup({
 })
 
 -- Tailwind CSS configuration
-lspconfig.tailwindcss.setup({
+setup_server("tailwindcss", {
 	capabilities = capabilities,
 	on_attach = on_attach,
 })
 
 -- Docker configuration
-lspconfig.dockerls.setup({
+setup_server("dockerls", {
 	capabilities = capabilities,
 	on_attach = on_attach,
 })
 
-lspconfig.docker_compose_language_service.setup({
+setup_server("docker_compose_language_service", {
 	capabilities = capabilities,
 	on_attach = on_attach,
 })
 
 -- Lua configuration
-lspconfig.lua_ls.setup({
+setup_server("lua_ls", {
 	capabilities = capabilities,
 	on_attach = on_attach,
 	settings = {
@@ -159,83 +250,181 @@ lspconfig.lua_ls.setup({
 	},
 })
 
-local prettier = {
-    formatCommand = "prettier --stdin-filepath ${INPUT} --single-quote false",
-    formatStdin = true,
+-- Define languages for efm
+local languages = {
+	lua = {
+		{
+			formatCommand = "stylua --stdin-filepath ${INPUT} -",
+			formatStdin = true,
+		},
+	},
+	javascript = {
+		{
+			formatCommand = "prettier --stdin-filepath ${INPUT} --single-quote false",
+			formatStdin = true,
+		},
+		{
+			lintCommand = "eslint_d --format unix --stdin --stdin-filename ${INPUT}",
+			lintStdin = true,
+			lintFormats = { "%f:%l:%c: %m" },
+			lintIgnoreExitCode = true,
+		},
+	},
+	typescript = {
+		{
+			formatCommand = "prettier --stdin-filepath ${INPUT} --single-quote false",
+			formatStdin = true,
+		},
+		{
+			lintCommand = "eslint_d --format unix --stdin --stdin-filename ${INPUT}",
+			lintStdin = true,
+			lintFormats = { "%f:%l:%c: %m" },
+			lintIgnoreExitCode = true,
+		},
+	},
+	typescriptreact = {
+		{
+			formatCommand = "prettier --stdin-filepath ${INPUT} --single-quote false",
+			formatStdin = true,
+		},
+		{
+			lintCommand = "eslint_d --format unix --stdin --stdin-filename ${INPUT}",
+			lintStdin = true,
+			lintFormats = { "%f:%l:%c: %m" },
+			lintIgnoreExitCode = true,
+		},
+	},
+	javascriptreact = {
+		{
+			formatCommand = "prettier --stdin-filepath ${INPUT} --single-quote false",
+			formatStdin = true,
+		},
+		{
+			lintCommand = "eslint_d --format unix --stdin --stdin-filename ${INPUT}",
+			lintStdin = true,
+			lintFormats = { "%f:%l:%c: %m" },
+			lintIgnoreExitCode = true,
+		},
+	},
+	php = {
+		{
+			formatCommand = "pint --stdin",
+			formatStdin = true,
+		},
+	},
+	blade = {
+		{
+			formatCommand = "blade-formatter --stdin --indent-size 2",
+			formatStdin = true,
+		},
+	},
+	css = {
+		{
+			formatCommand = "prettier --stdin-filepath ${INPUT} --single-quote false",
+			formatStdin = true,
+		},
+		{
+			lintCommand = "stylelint --formatter unix --stdin-filename ${INPUT} --stdin",
+			lintStdin = true,
+			lintFormats = { "%f:%l:%c: %m" },
+			lintIgnoreExitCode = true,
+		},
+	},
+	scss = {
+		{
+			formatCommand = "prettier --stdin-filepath ${INPUT} --single-quote false",
+			formatStdin = true,
+		},
+		{
+			lintCommand = "stylelint --formatter unix --stdin-filename ${INPUT} --stdin",
+			lintStdin = true,
+			lintFormats = { "%f:%l:%c: %m" },
+			lintIgnoreExitCode = true,
+		},
+	},
+	json = {
+		{
+			formatCommand = "prettier --stdin-filepath ${INPUT} --single-quote false",
+			formatStdin = true,
+		},
+	},
+	yaml = {
+		{
+			formatCommand = "prettier --stdin-filepath ${INPUT} --single-quote false",
+			formatStdin = true,
+		},
+	},
 }
 
-local eslint = {
-    lintCommand = "eslint_d -f unix --stdin --stdin-filename ${INPUT}",
-    lintStdin = true,
-    lintFormats = {"%f:%l:%c: %m"},
-    lintIgnoreExitCode = true,
-}
-
-local stylelint = {
-    lintCommand = "stylelint --formatter unix --stdin-filename ${INPUT} --stdin",
-    lintStdin = true,
-    lintFormats = {"%f:%l:%c: %m"},
-    lintIgnoreExitCode = true,
-    formatCommand = "stylelint --fix --stdin-filename ${INPUT} --stdin",
-    formatStdin = true,
-}
-
-local pint = {
-    formatCommand = "pint ${INPUT}",
-    formatStdin = false,
-}
-
-local blade_formatter = {
-    formatCommand = "blade-formatter --stdin",
-    formatStdin = true,
-}
-
-local stylua = {
-    formatCommand = "stylua --stdin-filepath ${INPUT} -",
-    formatStdin = true,
-}
-
--- efm with formatters and linters
-lspconfig.efm.setup({
-    capabilities = capabilities,
-    on_attach = on_attach,
-    init_options = {documentFormatting = true},
-    filetypes = {"javascript", "typescript", "typescriptreact", "javascriptreact", "php", "lua", "blade", "css", "scss", "json", "yaml"},
-    settings = {
-        rootMarkers = {".git/"},
-        languages = {
-            javascript = {prettier, eslint},
-            typescript = {prettier, eslint},
-            typescriptreact = {prettier, eslint},
-            javascriptreact = {prettier, eslint},
-            php = {pint},
-            blade = {blade_formatter},
-            css = {prettier, stylelint},
-            scss = {prettier, stylelint},
-            lua = {stylua},
-            json = {prettier},
-            yaml = {prettier},
-        }
-    }
+-- Configure efm with formatters and linters
+setup_server("efm", {
+	capabilities = capabilities,
+	on_attach = on_attach,
+	init_options = { documentFormatting = true },
+	filetypes = {
+		"javascript",
+		"typescript",
+		"typescriptreact",
+		"javascriptreact",
+		"php",
+		"lua",
+		"blade",
+		"css",
+		"scss",
+		"json",
+		"yaml",
+	},
+	settings = {
+		rootMarkers = { ".git/" },
+		languages = languages,
+	},
 })
 
+local function select_formatter(bufnr)
+	local clients = vim.lsp.get_active_clients({ bufnr = bufnr })
+	for _, client in ipairs(clients) do
+		if client.name == "efm" and client.supports_method("textDocument/formatting") then
+			return "efm"
+		end
+	end
 
+	for _, client in ipairs(clients) do
+		if client.name ~= "efm" and client.supports_method("textDocument/formatting") then
+			return client.name
+		end
+	end
+end
 
 -- Format on save
 vim.api.nvim_create_autocmd("BufWritePre", {
-    pattern = { "*" },
-    callback = function(args)
-        local filetype = vim.bo[args.buf].filetype
-        
-        vim.lsp.buf.format({
-            bufnr = args.buf,
-            timeout_ms = 3000,
-            filter = function(client)
-                -- Prefer efm for formatting
-                return client.name == "efm"
-            end,
-        })
-    end,
+	pattern = {
+		"*.lua",
+		"*.js",
+		"*.ts",
+		"*.tsx",
+		"*.jsx",
+		"*.php",
+		"*.blade.php",
+		"*.css",
+		"*.scss",
+		"*.json",
+		"*.yaml",
+		"*.yml",
+	},
+	callback = function(args)
+		local target = select_formatter(args.buf)
+		if not target then
+			return
+		end
+
+		vim.lsp.buf.format({
+			bufnr = args.buf,
+			timeout_ms = 3000,
+			filter = function(client)
+				return client.name == target
+			end,
+		})
+	end,
 })
 
 -- Load snippets

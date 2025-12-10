@@ -11,7 +11,6 @@ vim.opt.softtabstop = 2
 vim.opt.smartindent = true
 vim.opt.signcolumn = "no"
 
-
 -- config diag display
 vim.diagnostic.config({
 	float = {
@@ -22,7 +21,6 @@ vim.diagnostic.config({
 	signs = true,
 })
 
-
 vim.api.nvim_create_autocmd("BufEnter", {
 	pattern = "*",
 	callback = function()
@@ -30,7 +28,23 @@ vim.api.nvim_create_autocmd("BufEnter", {
 	end,
 })
 
+vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
+	pattern = "*.blade.php",
+	callback = function()
+		vim.bo.filetype = "blade"
+	end,
+})
 
+-- File-specific indentation settings
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "php",
+	callback = function()
+		-- Set 4 spaces for PHP files
+		vim.opt_local.tabstop = 4
+		vim.opt_local.shiftwidth = 4
+		vim.opt_local.softtabstop = 4
+	end,
+})
 
 -- Schemes
 
@@ -48,7 +62,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
 -- vim.cmd.colorscheme "bluloco"
 
 -- For Modus
-vim.cmd.colorscheme "modus_vivendi"
+vim.cmd.colorscheme("modus_vivendi")
 
 vim.cmd([[
 	  hi NvimTreeWinSeparator guifg=none guibg=none
