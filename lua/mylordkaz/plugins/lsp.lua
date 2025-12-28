@@ -10,10 +10,14 @@ require("mason-lspconfig").setup({
 		"jsonls", -- JSON
 		"tailwindcss", -- Tailwind
 		"astro", -- Astro
+		"solidity_ls", -- Solidity
+		"pyright", -- Python
+		"efm",
 	},
 })
 
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
+local util = require("lspconfig.util")
 
 -- Shared on_attach function
 local on_attach = function(client, bufnr)
@@ -55,12 +59,16 @@ cmp.setup({
 	},
 })
 
-local lspconfig = require("lspconfig")
+local function setup(server, opts)
+	opts = opts or {}
+	opts.capabilities = opts.capabilities or capabilities
+	opts.on_attach = opts.on_attach or on_attach
+	vim.lsp.config(server, opts)
+	vim.lsp.enable(server)
+end
 
 -- TypeScript/JavaScript configuration
-lspconfig.ts_ls.setup({
-	capabilities = capabilities,
-	on_attach = on_attach,
+setup("ts_ls", {
 	settings = {
 		typescript = {
 			inlayHints = {
@@ -84,9 +92,7 @@ lspconfig.ts_ls.setup({
 })
 
 -- Svelte configuration
-lspconfig.svelte.setup({
-	capabilities = capabilities,
-	on_attach = on_attach,
+setup("svelte", {
 	settings = {
 		svelte = {
 			plugin = {
@@ -99,9 +105,7 @@ lspconfig.svelte.setup({
 })
 
 -- Lua configuration
-lspconfig.lua_ls.setup({
-	capabilities = capabilities,
-	on_attach = on_attach,
+setup("lua_ls", {
 	settings = {
 		Lua = {
 			diagnostics = {
@@ -120,9 +124,7 @@ lspconfig.lua_ls.setup({
 })
 
 -- Go configuration
-lspconfig.gopls.setup({
-	capabilities = capabilities,
-	on_attach = on_attach,
+setup("gopls", {
 	settings = {
 		gopls = {
 			analyses = {
@@ -147,62 +149,189 @@ lspconfig.gopls.setup({
 	},
 })
 
--- Astro configuration
-lspconfig.astro.setup({
-	capabilities = capabilities,
-	on_attach = on_attach,
-})
-
--- Null-ls configuration for formatters and linters
-local null_ls = require("null-ls")
-require("mason-null-ls").setup({
-	ensure_installed = {
-		"prettier", -- JS/TS/Svelte formatting
-		"gofmt", -- Go formatting
-		"golangci-lint", -- Go linting
-		"eslint_d", -- JS/TS/Svelte linting
-		"stylua", -- Lua formatting
+-- Solidity
+setup("solidity_ls", {
+	filetypes = { "solidity" },
+	root_dir = util.root_pattern("hardhat.config.*", "foundry.toml", "remappings.txt", ".git"),
+	settings = {
+		solidity = {
+			includePath = "",
+			remappings = {
+				["@openzeppelin/"] = "lib/openzeppelin-contracts/",
+				["account-abstraction/"] = "lib/account-abstraction/",
+			},
+		},
 	},
 })
 
-null_ls.setup({
-	sources = {
-		-- Formatting
-		null_ls.builtins.formatting.prettier,
-		null_ls.builtins.formatting.gofmt,
-		null_ls.builtins.formatting.stylua,
+-- Astro configuration
+setup("astro")
 
-		-- Diagnostics
-		null_ls.builtins.diagnostics.eslint_d.with({
-			condition = function(utils)
-				return utils.root_has_file({ ".eslintrc.js", ".eslintrc.json", ".eslintrc" })
-			end,
-		}),
-		null_ls.builtins.diagnostics.golangci_lint.with({
-			diagnostics_format = "[#{c}] #{m} (#{s})",
-			extra_args = {
-				"--disable=errcheck",
+local languages = {
+	lua = {
+		{
+			formatCommand = "stylua --search-parent-directories --stdin-filepath ${INPUT} -",
+			formatStdin = true,
+		},
+	},
+	javascript = {
+		{
+			formatCommand = "prettierd ${INPUT}",
+			formatStdin = true,
+		},
+		{
+			lintCommand = "eslint_d --format unix --stdin --stdin-filename ${INPUT}",
+			lintStdin = true,
+			lintFormats = { "%f:%l:%c: %m" },
+			lintIgnoreExitCode = true,
+		},
+	},
+	typescript = {
+		{
+			formatCommand = "prettierd ${INPUT}",
+			formatStdin = true,
+		},
+		{
+			lintCommand = "eslint_d --format unix --stdin --stdin-filename ${INPUT}",
+			lintStdin = true,
+			lintFormats = { "%f:%l:%c: %m" },
+			lintIgnoreExitCode = true,
+		},
+	},
+	json = {
+		{
+			formatCommand = "prettierd ${INPUT}",
+			formatStdin = true,
+		},
+	},
+	solidity = {
+		{
+			formatCommand = "prettierd ${INPUT} --plugin=prettier-plugin-solidity",
+			formatStdin = true,
+		},
+		{
+			lintCommand = "solhint --formatter unix ${INPUT}",
+			lintStdin = false,
+			lintFormats = { "%f:%l:%c: %m" },
+		},
+	},
+	go = {
+		{
+			formatCommand = "gofmt -s",
+			formatStdin = true,
+		},
+		{
+			lintCommand = "golangci-lint run --out-format line-number --disable=errcheck ${INPUT}",
+			lintStdin = false,
+			lintFormats = { "%f:%l:%c: %m" },
+		},
+	},
+	dart = {
+		{
+			formatCommand = "dart format --stdin",
+			formatStdin = true,
+		},
+	},
+	arb = {
+		{
+			formatCommand = "prettierd ${INPUT}",
+			formatStdin = true,
+		},
+	},
+	python = {
+		{
+			formatCommand = "black --quiet -",
+			formatStdin = true,
+		},
+		{
+			lintCommand = "ruff check --stdin-filename ${INPUT} -",
+			lintStdin = true,
+			lintFormats = { "%f:%l:%c: %m" },
+		},
+	},
+}
+
+-- Dart configuration
+setup("dartls", {
+	settings = {
+		dart = {
+			analysisExcludedFolders = {
+				vim.fn.expand("$HOME/AppData/Local/Pub/Cache"),
+				vim.fn.expand("$HOME/.pub-cache"),
+				vim.fn.expand("/opt/homebrew/"),
+				vim.fn.expand("$HOME/tools/flutter/"),
 			},
-		}),
+			updateImportsOnRename = true,
+			completeFunctionCalls = true,
+			showTodos = true,
+		},
+	},
+})
+
+-- Python configuration
+setup("pyright", {
+	settings = {
+		python = {
+			analysis = {
+				typeCheckingMode = "basic", -- or "strict" / "off"
+				autoImportCompletions = true,
+				useLibraryCodeForTypes = true,
+			},
+		},
+	},
+})
+
+setup("efm", {
+	init_options = { documentFormatting = true, codeAction = true },
+	filetypes = { "lua", "javascript", "typescript", "json", "solidity", "go", "svelte", "dart", "arb", "python" },
+	settings = {
+		rootMarkers = { ".git/" },
+		languages = languages,
 	},
 })
 
 -- Format on save
-vim.api.nvim_create_autocmd("BufWritePre", {
-	pattern = { "*" },
-	callback = function(args)
-		local filetype = vim.bo[args.buf].filetype
-		local have_nls = #require("null-ls.sources").get_available(filetype, "NULL_LS_FORMATTING") > 0
+local preferred_formatter = {
+	lua = "lua_ls",
+	javascript = "eslint",
+	javascriptreact = "eslint",
+	typescript = "eslint",
+	typescriptreact = "eslint",
+	svelte = "eslint",
+	astro = "eslint",
+	go = "gopls",
+	dart = "dartls",
+	solidity = "solidity_ls",
+	json = "efm",
+	arb = "efm",
+	python = "efm",
+}
 
+vim.api.nvim_create_autocmd("BufWritePre", {
+	pattern = {
+		"*.lua",
+		"*.js",
+		"*.ts",
+		"*.jsx",
+		"*.tsx",
+		"*.astro",
+		"*.json",
+		"*.sol",
+		"*.go",
+		"*.svelte",
+		"*.dart",
+		"*.arb",
+		"*.py",
+	},
+	callback = function(args)
+		local ft = vim.bo[args.buf].filetype
+		local target = preferred_formatter[ft]
 		vim.lsp.buf.format({
 			bufnr = args.buf,
 			timeout_ms = 3000,
-			filter = function(client)
-				if have_nls then
-					return client.name == "null-ls"
-				end
-				return client.name ~= "null-ls"
-			end,
+			filter = target and function(client)
+				return client.name == target
+			end or nil,
 		})
 	end,
 })

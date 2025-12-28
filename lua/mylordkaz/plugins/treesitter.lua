@@ -14,15 +14,19 @@ require("nvim-treesitter.configs").setup({
 		"svelte",
 		"astro",
 
+		-- Mobile
+		"dart",
+
 		-- Extras that are good to have
 		"json",
 		"yaml",
 		"markdown",
 		"bash",
 		"lua",
+		"gitignore",
+		"solidity",
 	},
 
-	sync_install = false,
 	auto_install = true,
 
 	highlight = {
@@ -33,4 +37,5 @@ require("nvim-treesitter.configs").setup({
 	indent = {
 		enable = true,
 	},
+
 })

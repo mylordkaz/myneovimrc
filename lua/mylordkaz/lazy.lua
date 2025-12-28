@@ -1,10 +1,10 @@
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
 	vim.fn.system({
 		"git",
 		"clone",
 		"--filter=blob:none",
-		"http://github.com/folke/lazy.nvim.git",
+		"https://github.com/folke/lazy.nvim.git",
 		"--branch=stable",
 		lazypath,
 	})
@@ -13,26 +13,28 @@ vim.opt.rtp:prepend(lazypath)
 
 local opts = {
 	install = {
-		-- "missing" means just install missing plugins
 		missing = true,
-		-- "notify" means show a notification when changes are made
 		notify = false,
 	},
 	change_detection = {
-		-- automatically check for config file changes and reload them
 		enabled = true,
 		notify = false,
 	},
 }
 
 return require("lazy").setup({
+	-- ========================================
+	-- Git Integration
+	-- ========================================
 	"tpope/vim-fugitive",
-
 	{
 		"lewis6991/gitsigns.nvim",
-		config = true, -- Call setup() automatically
+		config = true,
 	},
 
+	-- ========================================
+	-- File Navigation & Search
+	-- ========================================
 	{
 		"nvim-telescope/telescope.nvim",
 		version = "0.1.8",
@@ -41,12 +43,6 @@ return require("lazy").setup({
 			"nvim-tree/nvim-web-devicons",
 		},
 	},
-
-	{
-		"nvim-treesitter/nvim-treesitter",
-		run = ":TSUpdate",
-	},
-
 	{
 		"nvim-tree/nvim-tree.lua",
 		version = "*",
@@ -56,6 +52,18 @@ return require("lazy").setup({
 		},
 	},
 
+	-- ========================================
+	-- Language Support & Syntax
+	-- ========================================
+	{
+		"nvim-treesitter/nvim-treesitter",
+		build = ":TSUpdate",
+	},
+	"wuelnerdotexe/vim-astro",
+
+	-- ========================================
+	-- LSP & Completion
+	-- ========================================
 	{
 		"neovim/nvim-lspconfig",
 		dependencies = {
@@ -68,33 +76,63 @@ return require("lazy").setup({
 			"L3MON4D3/LuaSnip",
 			"saadparwaiz1/cmp_luasnip",
 			"rafamadriz/friendly-snippets",
-			"jose-elias-alvarez/null-ls.nvim",
-			"jayp0521/mason-null-ls.nvim",
-			"wuelnerdotexe/vim-astro",
 		},
 	},
 
+	-- ========================================
+	-- Editing Enhancements
+	-- ========================================
 	{
 		"windwp/nvim-autopairs",
-		config = function()
-			require("nvim-autopairs").setup({})
-		end,
 	},
-
+	{
+		"windwp/nvim-ts-autotag",
+		dependencies = { "nvim-treesitter/nvim-treesitter" },
+	},
 	{
 		"numToStr/Comment.nvim",
 		config = true,
 		lazy = false,
 	},
+	{
+		"kylechui/nvim-surround",
+		version = "^3.0.0",
+		event = "VeryLazy",
+		config = function()
+			require("nvim-surround").setup({})
+		end,
+	},
 
-	-- color schemes
+	-- ========================================
+	-- Color Schemes
+	-- ========================================
 	"sainnhe/sonokai",
-	{ "catppuccin/nvim", name = "catppuccin" },
+	{
+		"catppuccin/nvim",
+		name = "catppuccin",
+	},
 	"tiagovla/tokyodark.nvim",
 	{
 		"uloco/bluloco.nvim",
 		dependencies = { "rktjmp/lush.nvim" },
 	},
-	{ "miikanissi/modus-themes.nvim", priority = 1000 },
-	{ "projekt0n/github-nvim-theme", name = "github-theme" },
+	{
+		"miikanissi/modus-themes.nvim",
+		priority = 1000,
+	},
+	{
+		"projekt0n/github-nvim-theme",
+		name = "github-theme",
+	},
+
+	-- ========================================
+	-- Mobile app development
+	-- ========================================
+	{
+		"akinsho/flutter-tools.nvim",
+		lazy = false,
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+		},
+	},
 }, opts)
