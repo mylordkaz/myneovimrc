@@ -42,10 +42,11 @@ vim.keymap.set("n", "<leader>gb", builtin.git_branches, { desc = "Git branches" 
 vim.keymap.set("n", "<leader>gs", builtin.git_status, { desc = "Git status" })
 
 -- Format shortcuts
-vim.keymap.set("n", "<leader>f", "gg=G<C-o>", { desc = "Format entire file" }) -- Space+f to format whole file
-vim.keymap.set("v", "<leader>f", "=", { desc = "Format selected code" }) -- Space+f to format selection
+vim.keymap.set("n", "<leader>f", function()
+	vim.lsp.buf.format({ async = true })
+end, { desc = "Format file (LSP)" })
+vim.keymap.set("v", "<leader>f", "=", { desc = "Format selected code (indent)" })
 vim.keymap.set("n", "<leader>df", vim.diagnostic.open_float, { desc = "Open diagnostics float" })
-vim.keymap.set("n", "<leader>F", vim.lsp.buf.format, { desc = "Format file" })
 
 -- Move lines up and down
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move line down" })
